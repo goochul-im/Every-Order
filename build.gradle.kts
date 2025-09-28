@@ -38,6 +38,11 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Kotlin jdsl
+    implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.0")
+    implementation("com.linecorp.kotlin-jdsl:jpql-render:3.5.0")
+    implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-support:3.5.0")
+
 }
 
 kotlin {
