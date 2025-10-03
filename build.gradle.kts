@@ -44,6 +44,12 @@ dependencies {
     implementation("com.linecorp.kotlin-jdsl:jpql-render:3.5.0")
     implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-support:3.5.0")
 
+    // java
+    implementation("com.auth0:java-jwt:4.4.0")
+
+    // log
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
 }
 
 kotlin {
