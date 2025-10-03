@@ -5,6 +5,8 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import net.datafaker.Faker
+
 
 @Entity
 class Member(
@@ -29,19 +31,29 @@ class Member(
     @Enumerated(value = EnumType.STRING)
     var role: Role,
 
-    @Column(nullable = true, name = "refresh_token")
-    var refreshToken: String?
-
 ) : AuditingEntity() {
     fun update(nickname: String, profileImageUrl: String?) {
         this.nickname = nickname
         this.profileImageUrl = profileImageUrl
     }
+
+    companion object {
+        fun createFakeMember(): Member {
+            return Member(
+                "fakemember",
+                SocialType.GOOGLE,
+                Faker().internet().emailAddress(),
+                Faker().name().fullName(),
+                "fake-image",
+                Role.USER,
+            )
+        }
+    }
 }
 
 enum class SocialType {
     GOOGLE,
-    KAKAO
+    KAKAO,
 }
 
 enum class Role {

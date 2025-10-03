@@ -35,7 +35,6 @@ class CustomOAuth2UserService(
                         nickname = userInfo.nickname,
                         profileImageUrl = userInfo.profileImageUrl,
                         role = Role.USER,
-                        refreshToken = null
                     )
                 )
             }
