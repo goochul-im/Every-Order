@@ -50,6 +50,9 @@ dependencies {
     // log
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
+    // 더미 데이터 라이브러리
+    implementation("net.datafaker:datafaker:2.5.1")
+
 }
 
 kotlin {
