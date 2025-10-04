@@ -108,7 +108,7 @@ class JwtManagerTest {
 
         // then
         val decodedJWT = jwtManager.verifier.verify(token)
-        assertEquals("fakemember", decodedJWT.getClaim(JwtConstant.CLAIM_ID).asString())
+        assertEquals(Member.FAKE_SOCIAL_ID, decodedJWT.getClaim(JwtConstant.CLAIM_ID).asString())
         assertEquals("ROLE_USER", decodedJWT.getClaim(JwtConstant.CLAIM_ROLE).asString())
         assertEquals(jwtManager.jwtSubject, decodedJWT.subject)
     }

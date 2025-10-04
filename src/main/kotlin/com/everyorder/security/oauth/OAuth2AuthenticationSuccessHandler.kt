@@ -1,22 +1,38 @@
 package com.everyorder.security.oauth
 
+import com.everyorder.util.CookieProvider
+import com.everyorder.util.JwtConstant
+import com.everyorder.util.JwtManager
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
-class OAuth2AuthenticationSuccessHandler : AuthenticationSuccessHandler {
+class OAuth2AuthenticationSuccessHandler(
+    val jwtManager: JwtManager
+) : AuthenticationSuccessHandler {
 
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
         response: HttpServletResponse,
         authentication: Authentication
     ) {
-        // TODO: 액세스 토큰 발급
-        response.status = HttpServletResponse.SC_OK
-        response.writer.write("Social login successful!")
-        response.writer.flush()
+        val details = authentication.principal as CustomUserDetails
+
+        val accessToken = jwtManager.generateAccessToken(details)
+        val refreshToken = jwtManager.generateRefreshToken(details)
+
+        val refreshTokenCookie = CookieProvider.createCookie(
+            JwtConstant.REFRESH_TOKEN_NAME,
+            refreshToken,
+            TimeUnit.HOURS.toSeconds(JwtConstant.REFRESH_TOKEN_EXPIRE_HOUR)
+        )
+
+        response.addHeader(JwtConstant.JWT_HEADER, "${JwtConstant.JWT_PREFIX}$accessToken")
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
     }
 }
