@@ -38,9 +38,13 @@ class Member(
     }
 
     companion object {
+
+        // data-faker 사용법 https://g.co/gemini/share/051321b71987
+        const val FAKE_SOCIAL_ID : String = "fakemember"
+
         fun createFakeMember(): Member {
             return Member(
-                "fakemember",
+                FAKE_SOCIAL_ID,
                 SocialType.GOOGLE,
                 Faker().internet().emailAddress(),
                 Faker().name().fullName(),

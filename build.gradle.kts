@@ -50,7 +50,7 @@ dependencies {
     // log
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
-    // 더미 데이터 라이브러리
+    // 더미 데이터 라이브러리 - 사용법 : https://g.co/gemini/share/051321b71987
     implementation("net.datafaker:datafaker:2.5.1")
 
 }
