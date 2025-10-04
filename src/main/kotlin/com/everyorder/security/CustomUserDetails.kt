@@ -1,4 +1,4 @@
-package com.everyorder.security.oauth
+package com.everyorder.security
 
 import com.everyorder.domain.member.Member
 import org.springframework.security.core.GrantedAuthority

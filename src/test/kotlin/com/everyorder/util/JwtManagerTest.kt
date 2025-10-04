@@ -2,7 +2,8 @@ package com.everyorder.util
 
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.everyorder.domain.member.Member
-import com.everyorder.security.oauth.CustomUserDetails
+import com.everyorder.exception.InvalidRefreshTokenException
+import com.everyorder.security.CustomUserDetails
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -84,10 +85,10 @@ class JwtManagerTest {
         val invalidToken = "invalid.token.string"
 
         // when & then
-        val exception = assertThrows(RuntimeException::class.java) {
+        val exception = assertThrows(InvalidRefreshTokenException::class.java) {
             jwtManager.validateRefreshToken(invalidToken)
         }
-        assertEquals("Invalid refresh token", exception.message)
+        assertEquals(InvalidRefreshTokenException().message, exception.message)
     }
 
     // generateToken is private, so we test it indirectly via the validation methods.

@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 
-class SecurityResponseHandler {
+object SecurityResponseHandler {
 
     private val objectMapper = ObjectMapper()
 

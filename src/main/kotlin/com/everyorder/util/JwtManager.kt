@@ -6,8 +6,10 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
-import com.everyorder.security.oauth.CustomUserDetails
-import com.nimbusds.oauth2.sdk.token.RefreshToken
+import com.everyorder.domain.member.Member
+import com.everyorder.exception.InvalidRefreshTokenException
+import com.everyorder.security.CustomUserDetails
+import jakarta.servlet.http.HttpServletRequest
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import java.util.Date
@@ -24,6 +26,10 @@ class JwtManager {
     val algorithm: Algorithm = Algorithm.HMAC512(JwtConstant.ACCESS_SECRET_KET)
     val verifier: JWTVerifier = JWT.require(algorithm).build()
     private val log = KotlinLogging.logger { }
+
+    fun getAccessTokenFromRequest(request : HttpServletRequest): String? {
+        return request.getHeader(JwtConstant.JWT_HEADER)?.replace(JwtConstant.JWT_PREFIX,"")?.trim()
+    }
 
     fun generateAccessToken(principal: CustomUserDetails): String {
 
@@ -59,8 +65,26 @@ class JwtManager {
             return verifier.verify(refreshToken)
         } catch (e: JWTVerificationException) {
             log.error { "Invalid refresh token : $e" }
-            throw RuntimeException("Invalid refresh token")
+            throw InvalidRefreshTokenException()
         }
+    }
+
+    fun getMemberSocialIdFromToken(token: DecodedJWT): String {
+        return token.getClaim(JwtConstant.CLAIM_ID).asString()
+    }
+
+    fun getMemberRoleFromToken(token: DecodedJWT): String {
+        return token.getClaim(JwtConstant.CLAIM_ROLE).asString()
+    }
+
+    fun reissueAccessToken(refreshToken: DecodedJWT): String {
+        val socialId = getMemberSocialIdFromToken(refreshToken)
+        val role = getMemberRoleFromToken(refreshToken)
+
+        val member = Member.forAuthentication(socialId, role)
+        val principal = CustomUserDetails(member)
+
+        return generateAccessToken(principal)
     }
 
     fun generateToken(

@@ -1,5 +1,6 @@
 package com.everyorder.security.oauth
 
+import com.everyorder.security.CustomUserDetails
 import com.everyorder.util.CookieProvider
 import com.everyorder.util.JwtConstant
 import com.everyorder.util.JwtManager
@@ -32,6 +33,7 @@ class OAuth2AuthenticationSuccessHandler(
             TimeUnit.HOURS.toSeconds(JwtConstant.REFRESH_TOKEN_EXPIRE_HOUR)
         )
 
+        //TODO: 프론트엔드의 URI로 직접 리다이렉트 시키면서 jwt 발급
         response.addHeader(JwtConstant.JWT_HEADER, "${JwtConstant.JWT_PREFIX}$accessToken")
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
     }

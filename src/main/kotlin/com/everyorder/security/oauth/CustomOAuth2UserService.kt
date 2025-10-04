@@ -4,6 +4,7 @@ import com.everyorder.domain.member.Member
 import com.everyorder.domain.member.MemberRepository
 import com.everyorder.domain.member.Role
 import com.everyorder.domain.member.SocialType
+import com.everyorder.security.CustomUserDetails
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.core.user.OAuth2User

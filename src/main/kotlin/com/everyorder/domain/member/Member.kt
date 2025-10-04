@@ -16,13 +16,13 @@ class Member(
 
     @Column(nullable = false, name = "social_type")
     @Enumerated(value = EnumType.STRING)
-    val socialType: SocialType,
+    val socialType: SocialType?,
 
     @Column(nullable = true, name = "email")
     var email: String?,
 
     @Column(nullable = false, name = "nickname")
-    var nickname: String,
+    var nickname: String?,
 
     @Column(nullable = true, name = "profile_image_url")
     var profileImageUrl: String?,
@@ -50,6 +50,17 @@ class Member(
                 Faker().name().fullName(),
                 "fake-image",
                 Role.USER,
+            )
+        }
+
+        fun forAuthentication(socialId:String, role:String): Member {
+            return Member(
+                socialId,
+                null,
+                null,
+                null,
+                null,
+                Role.valueOf(role.replace("ROLE_",""))
             )
         }
     }
