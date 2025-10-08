@@ -1,5 +1,6 @@
 package com.everyorder.config.security
 
+import com.everyorder.security.authenticate.JwtAuthenticationFilter
 import com.everyorder.security.oauth.CustomOAuth2UserService
 import com.everyorder.security.oauth.OAuth2AuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -16,17 +18,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
-    private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler
+    private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler,
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity) : SecurityFilterChain {
 
-        http.cors{}
+        http.authorizeHttpRequests {
+            it.requestMatchers("/auth").authenticated()
+                .requestMatchers("/health").permitAll()
+        }
+            .cors{}
             .formLogin { it.disable() }
             .csrf { it.disable() }
             .httpBasic { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .oauth2Login {
                 it.userInfoEndpoint { u -> u.userService(customOAuth2UserService) }
                 it.successHandler(oAuth2AuthenticationSuccessHandler)
