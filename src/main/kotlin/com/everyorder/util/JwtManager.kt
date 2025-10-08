@@ -11,13 +11,16 @@ import com.everyorder.exception.InvalidRefreshTokenException
 import com.everyorder.security.CustomUserDetails
 import jakarta.servlet.http.HttpServletRequest
 import mu.KotlinLogging
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
 
 @Component
-class JwtManager {
+class JwtManager(
+    private val redisTemplate: RedisTemplate<String, String>
+) {
 
     private val accessTokenExpireMinutes : Long = 5
     private val refreshTokenExpireHours : Long = JwtConstant.REFRESH_TOKEN_EXPIRE_HOUR
@@ -98,5 +101,30 @@ class JwtManager {
         .withClaim(JwtConstant.CLAIM_ID, principal.name)
         .withClaim(JwtConstant.CLAIM_ROLE, role)
         .sign(algorithm)
+
+    private fun getRedisKey(socialId: String): String {
+        return "${JwtConstant.REFRESH_TOKEN_REDIS_PREFIX}$socialId"
+    }
+
+    fun saveRefreshToken(socialId: String, refreshToken: String) {
+        val key = getRedisKey(socialId)
+        redisTemplate.opsForValue().set(key, refreshToken, refreshTokenExpireHours, TimeUnit.HOURS)
+    }
+
+    fun removeRefreshToken(socialId: String) {
+        val key = getRedisKey(socialId)
+        redisTemplate.delete(key)
+    }
+
+    /**
+     * Retrieves a refresh token associated with the provided social ID from the Redis data store.
+     *
+     * @param socialId the unique identifier of the user in the social system used as a key to fetch the refresh token
+     * @return the refresh token as a string if it exists; null otherwise
+     */
+    fun getRefreshToken(socialId: String): String? {
+        val key = getRedisKey(socialId)
+        return redisTemplate.opsForValue().get(key)
+    }
 
 }

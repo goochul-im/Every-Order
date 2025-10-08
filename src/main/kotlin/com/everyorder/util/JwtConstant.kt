@@ -10,5 +10,6 @@ object JwtConstant {
     const val REFRESH_SECRET_KEY = "refreshSecret"
     const val REFRESH_TOKEN_NAME = "every_order_refresh_token"
     const val REFRESH_TOKEN_EXPIRE_HOUR : Long = 48
+    const val REFRESH_TOKEN_REDIS_PREFIX = "redis-refresh"
 
 }
