@@ -8,6 +8,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.everyorder.domain.member.Member
 import com.everyorder.exception.InvalidRefreshTokenException
+import com.everyorder.exception.MismatchRefreshTokenException
 import com.everyorder.security.CustomUserDetails
 import jakarta.servlet.http.HttpServletRequest
 import mu.KotlinLogging
@@ -22,7 +23,7 @@ class JwtManager(
     private val redisTemplate: RedisTemplate<String, String>
 ) {
 
-    private val accessTokenExpireMinutes : Long = 5
+    private val accessTokenExpireMinutes : Long = 1
     private val refreshTokenExpireHours : Long = JwtConstant.REFRESH_TOKEN_EXPIRE_HOUR
 
     val jwtSubject = "my-token"
@@ -106,12 +107,12 @@ class JwtManager(
         return "${JwtConstant.REFRESH_TOKEN_REDIS_PREFIX}$socialId"
     }
 
-    fun saveRefreshToken(socialId: String, refreshToken: String) {
+    fun saveRefreshTokenToRedis(socialId: String, refreshToken: String) {
         val key = getRedisKey(socialId)
         redisTemplate.opsForValue().set(key, refreshToken, refreshTokenExpireHours, TimeUnit.HOURS)
     }
 
-    fun removeRefreshToken(socialId: String) {
+    fun removeRefreshTokenFromRedis(socialId: String) {
         val key = getRedisKey(socialId)
         redisTemplate.delete(key)
     }
@@ -122,9 +123,14 @@ class JwtManager(
      * @param socialId the unique identifier of the user in the social system used as a key to fetch the refresh token
      * @return the refresh token as a string if it exists; null otherwise
      */
-    fun getRefreshToken(socialId: String): String? {
+    fun getRefreshTokenFromRedis(socialId: String): String? {
         val key = getRedisKey(socialId)
         return redisTemplate.opsForValue().get(key)
+    }
+
+    fun isMatchedRefreshToken(socialId: String, refreshToken: String) : Boolean {
+        val memberSocialIdFromToken = getRefreshTokenFromRedis(socialId) ?: throw MismatchRefreshTokenException()
+        return memberSocialIdFromToken == refreshToken
     }
 
 }

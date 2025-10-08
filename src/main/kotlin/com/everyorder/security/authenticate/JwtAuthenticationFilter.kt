@@ -3,15 +3,14 @@ package com.everyorder.security.authenticate
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.everyorder.domain.member.Member
-import com.everyorder.domain.member.Role
 import com.everyorder.exception.InvalidRefreshTokenException
+import com.everyorder.exception.MismatchRefreshTokenException
 import com.everyorder.security.CustomUserDetails
 import com.everyorder.security.SecurityResponseHandler
 import com.everyorder.util.CookieProvider
 import com.everyorder.util.JwtConstant
 import com.everyorder.util.JwtManager
 import jakarta.servlet.FilterChain
-import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
@@ -83,6 +82,10 @@ class JwtAuthenticationFilter(
                 ?: throw InvalidRefreshTokenException()
 
             val decodedRefreshToken = jwtManager.validateRefreshToken(refreshToken)
+            val socialId = jwtManager.getMemberSocialIdFromToken(decodedRefreshToken)
+
+            if (!jwtManager.isMatchedRefreshToken(socialId, refreshToken)) throw MismatchRefreshTokenException()
+
             val newAccessToken = jwtManager.reissueAccessToken(decodedRefreshToken)
             val newDecodedAccessToken = jwtManager.validateAccessToken(newAccessToken)
 
@@ -101,8 +104,19 @@ class JwtAuthenticationFilter(
             )
 
             return
+        } catch (e: MismatchRefreshTokenException) {
+            log.warn( "리프레시 토큰이 DB에 저장되어있지 않거나, 일치하지 않습니다. : ${e.message}" )
+            SecurityContextHolder.clearContext()
+
+            SecurityResponseHandler.sendErrorResponse(
+                response,
+                HttpStatus.UNAUTHORIZED,
+                "리프레시 토큰이 유효하지 않습니다"
+            )
+
+            return
         } catch (e: Exception) {
-            log.error { "알수없는 서버 오류로 액세스 토큰 재발급 실패" }
+            log.error { "알수없는 서버 오류로 액세스 토큰 재발급 실패! message : ${e.message}" }
             SecurityContextHolder.clearContext()
         }
 

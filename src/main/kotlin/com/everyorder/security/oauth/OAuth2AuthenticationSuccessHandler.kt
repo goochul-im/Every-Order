@@ -6,6 +6,7 @@ import com.everyorder.util.JwtConstant
 import com.everyorder.util.JwtManager
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import mu.KotlinLogging
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
@@ -17,15 +18,25 @@ class OAuth2AuthenticationSuccessHandler(
     val jwtManager: JwtManager
 ) : AuthenticationSuccessHandler {
 
+    private val log = KotlinLogging.logger { }
+
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
         response: HttpServletResponse,
         authentication: Authentication
     ) {
+
         val details = authentication.principal as CustomUserDetails
 
         val accessToken = jwtManager.generateAccessToken(details)
         val refreshToken = jwtManager.generateRefreshToken(details)
+
+        val socialId = details.name
+        log.info( "$socialId has login")
+        log.info( "accessToken = $accessToken")
+        log.info( "refreshToken = $refreshToken" )
+
+        jwtManager.saveRefreshTokenToRedis(socialId, refreshToken)
 
         val refreshTokenCookie = CookieProvider.createCookie(
             JwtConstant.REFRESH_TOKEN_NAME,
