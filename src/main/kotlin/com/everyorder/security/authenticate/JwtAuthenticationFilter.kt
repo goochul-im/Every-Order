@@ -73,6 +73,7 @@ class JwtAuthenticationFilter(
         )
 
         SecurityContextHolder.getContext().authentication = authentication
+        log.debug { "id:${socialId} 요청" }
     }
 
     private fun reissueToken(request: HttpServletRequest, response: HttpServletResponse) {
